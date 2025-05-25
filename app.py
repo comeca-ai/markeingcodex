@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import subprocess
 
 st.set_page_config(page_title="Marketing Codex", layout="wide")
 
@@ -11,8 +12,20 @@ st.info(
 )
 
 try:
-    with open('marketing-codex/out/index.html') as f:
+    with open("marketing-codex/out/index.html") as f:
         html = f.read()
     components.html(html, height=800, scrolling=True)
 except FileNotFoundError:
-    st.error('Arquivo build não encontrado. Execute `npm run build` primeiro.')
+    st.warning(
+        "Arquivo build não encontrado. Tentando executar `npm run build`..."
+    )
+    try:
+        subprocess.run(["npm", "run", "build"], cwd="marketing-codex", check=True)
+        with open("marketing-codex/out/index.html") as f:
+            html = f.read()
+        components.html(html, height=800, scrolling=True)
+    except Exception:
+        st.error(
+            "Não foi possível gerar o build automaticamente.\n"
+            "Certifique-se de que as dependências estão instaladas e execute `npm run build` manualmente."
+        )
